@@ -5,27 +5,45 @@
 
 #include <Windows.h>
 
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nCmdShow)
 {
+	const wchar_t MyWindow[] = L"Window Class";
+	
 	MSG msg;
 	BOOL bRet;
-	WNDCLASSA wc;
+	WNDCLASS wc;
 
-	wc.style			= CS_DBLCLKS | CS_PARENTDC;
-	wc.lpfnWndProc		= (WNDPROC)WndProc;
-	wc.cbClsExtra		= 0;
-	wc.cbWndExtra		= 0;
-	wc.hInstance		= hInstance;
-	wc.hIcon			= NULL;
-	wc.hCursor			= LoadCursor(NULL, (LPTSTR)IDC_IBEAM);
-	wc.hbrBackground	= NULL;
-	wc.lpszMenuName		= "MyWindow";
-	wc.lpszClassName	= "MyWindow";
+	wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
+	wc.lpfnWndProc = (WNDPROC)WndProc;
+	wc.cbClsExtra = 0;
+	wc.cbWndExtra = 0;
+	wc.hInstance = hInstance;
+	wc.hIcon = NULL;
+	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
+	wc.lpszMenuName = L"MyWindow";
+	wc.lpszClassName = MyWindow;
 
-	RegisterClassA(&wc);
+	RegisterClass(&wc);
 	
+	HWND hwnd = CreateWindowEx(
+		0, 
+		MyWindow, 
+		L"Mywindow", 
+		WS_OVERLAPPEDWINDOW,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT, 
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		NULL,
+		NULL,
+		hInstance,
+		NULL
+		);
+
+	ShowWindow(hwnd, nCmdShow);
 
 	// Window Message Loop
 	while ((bRet = GetMessage(&msg, NULL, 0, 0)) != 0)
@@ -44,15 +62,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 	return 0;
 }
 
-LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
-		case WM_CHAR:
+		case WM_DESTROY:
+			PostQuitMessage(0);
 			break;
 
 		default:
-			return DefWindowProc(hWnd, message, wParam, lParam);
+			return DefWindowProc(hwnd, message, wParam, lParam);
 	}
 	
 	return 0;
