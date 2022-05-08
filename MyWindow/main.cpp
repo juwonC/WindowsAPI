@@ -4,6 +4,7 @@
 // 4. 윈도우 프로시져(Procedure) 작성
 
 #include <Windows.h>
+#include <sstream>
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -32,7 +33,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 		0, 
 		MyWindow, 
 		L"Mywindow", 
-		WS_OVERLAPPEDWINDOW,
+		WS_OVERLAPPEDWINDOW | WS_VSCROLL,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT, 
 		CW_USEDEFAULT,
@@ -66,6 +67,33 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
+		case WM_LBUTTONDOWN:
+		{
+			POINT pt;
+
+			pt.x = LOWORD(lParam);
+			pt.y = HIWORD(lParam);
+
+			std::wostringstream oss;
+
+			oss << "X : " << pt.x
+				<< ", Y : " << pt.y;
+
+			MessageBox(hwnd, oss.str().c_str(), L"Coordinate", MB_OK);
+
+			break;
+		}
+
+		case WM_PAINT:
+		{
+			PAINTSTRUCT ps;
+			HDC hdc = BeginPaint(hwnd, &ps);
+
+			Rectangle(hdc, 0, 0, 100, 100);
+
+			break;
+		}
+
 		case WM_DESTROY:
 			PostQuitMessage(0);
 			break;
