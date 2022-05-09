@@ -78,14 +78,16 @@ void OnPaint(HWND hwnd)
 	PAINTSTRUCT ps;
 	HDC hdc = BeginPaint(hwnd, &ps);
 
-	HPEN redPen = CreatePen(PS_DASH, 1, RGB(255, 0, 0));
+	HPEN redPen = CreatePen(PS_SOLID, 1, RGB(255, 0, 0));
 	HPEN oldPen = (HPEN)SelectObject(hdc, redPen);
 	
-	Ellipse(hdc, 0, 0, 100, 100);
+	//Ellipse(hdc, 0, 0, 100, 100);
+	//LineTo(hdc, 50, 50);
+	AngleArc(hdc, 100, 100, 70, 0, 70.5);
 
 	DeleteObject(redPen);
 	SelectObject(hdc, oldPen);
-	
+
 	HBRUSH brush = CreateSolidBrush(RGB(0, 0, 255));
 	HBRUSH oldBrush = (HBRUSH)SelectObject(hdc, brush);
 
@@ -94,6 +96,34 @@ void OnPaint(HWND hwnd)
 
 	DeleteObject(brush);
 	SelectObject(hdc, oldBrush);
+
+	HFONT font = (HFONT)GetStockObject(ANSI_VAR_FONT);
+	HFONT oldFont = (HFONT)SelectObject(hdc, font);
+	
+	TextOut(hdc, 200, 200, L"ANSI_VAR_FONT", 13);
+
+	DeleteObject(font);
+
+	TRIVERTEX vertex[2];
+	vertex[0].x = 300;
+	vertex[0].y = 100;
+	vertex[0].Red = 0xd000;
+	vertex[0].Green = 0x8000;
+	vertex[0].Blue = 0x8000;
+	vertex[0].Alpha = 0x0000;
+
+	vertex[1].x = 600;
+	vertex[1].y = 10;
+	vertex[1].Red = 0x8000;
+	vertex[1].Green = 0xd000;
+	vertex[1].Blue = 0xd000;
+	vertex[1].Alpha = 0x0000;
+
+	GRADIENT_RECT gRect;
+	gRect.UpperLeft = 0;
+	gRect.LowerRight = 1;
+
+	GdiGradientFill(hdc, vertex, 2, &gRect, 1, GRADIENT_FILL_RECT_H);
 
 	EndPaint(hwnd, &ps);
 }
