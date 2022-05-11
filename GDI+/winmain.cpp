@@ -38,14 +38,17 @@ int WINAPI WinMain
 		return 0;
 	}
 
+	RECT rect{ 0, 0, 640, 480 };
+	AdjustWindowRect(&rect, WS_OVERLAPPED, FALSE);
+
 	hwnd = CreateWindowEx(
 		NULL,
 		gClassName,
 		L"MyWindow",
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT,
-		640,
-		480,
+		rect.right - rect.left,
+		rect.bottom - rect.top,
 		NULL,
 		NULL,
 		hInstance,
@@ -84,11 +87,24 @@ void OnPaint(HWND hwnd)
 	Gdiplus::Font font(&fontFamily, 20, Gdiplus::FontStyleRegular, Gdiplus::UnitPixel);
 	Gdiplus::PointF point(0.0f, 100.0f);
 	Gdiplus::RectF rect(100.0f, 0.0f, 50.0f, 50.0f);
+	Gdiplus::Point destinationPoints[] = {
+		Gdiplus::Point(150, 20),
+		Gdiplus::Point(110, 100),
+		Gdiplus::Point(250, 30)
+	};
 
 	graphics.DrawLine(&pen, 0, 0, 50, 50);
 	graphics.DrawString(L"Hello World!", -1, &font, point, &brush);
 	graphics.DrawRectangle(&pen, rect);
 	graphics.FillRectangle(&brush, rect);
+	graphics.DrawEllipse(&pen, 150, 100, 100, 100);
+
+	Gdiplus::Image image(L"Data/controller.png");
+	//graphics.DrawImage(&image,0, 0, image.GetWidth(), image.GetHeight());
+	graphics.DrawImage(&image, 0, 0,
+		ps.rcPaint.right - ps.rcPaint.left,
+		ps.rcPaint.bottom - ps.rcPaint.top);
+	graphics.DrawImage(&image, destinationPoints, 3);
 
 	EndPaint(hwnd, &ps);
 }
