@@ -67,13 +67,40 @@ int WINAPI WinMain
 	}
 
 	Gdiplus::GdiplusShutdown(gdiplusToken);
-	return msg.wParam;
+	return static_cast<int>(msg.wParam);
+}
+
+void OnPaint(HWND hwnd)
+{
+	HDC hdc;
+	PAINTSTRUCT ps;
+
+	hdc = BeginPaint(hwnd, &ps);
+
+	Gdiplus::Graphics graphics(hdc);
+	Gdiplus::Pen pen(Gdiplus::Color(255, 0, 0, 255));
+	Gdiplus::SolidBrush brush(Gdiplus::Color(255, 0, 100, 0));
+	Gdiplus::FontFamily fontFamily(L"Times New Roman");
+	Gdiplus::Font font(&fontFamily, 20, Gdiplus::FontStyleRegular, Gdiplus::UnitPixel);
+	Gdiplus::PointF point(0.0f, 100.0f);
+	Gdiplus::RectF rect(100.0f, 0.0f, 50.0f, 50.0f);
+
+	graphics.DrawLine(&pen, 0, 0, 50, 50);
+	graphics.DrawString(L"Hello World!", -1, &font, point, &brush);
+	graphics.DrawRectangle(&pen, rect);
+	graphics.FillRectangle(&brush, rect);
+
+	EndPaint(hwnd, &ps);
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
+		case WM_PAINT:
+			OnPaint(hwnd);
+			break;
+		
 		case WM_CLOSE:
 			DestroyWindow(hwnd);
 			break;
