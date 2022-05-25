@@ -1,4 +1,5 @@
 #include <windows.h>
+#include "D2DFramework.h"
 
 const wchar_t gClassName[] = L"MyWindowClass";
 
