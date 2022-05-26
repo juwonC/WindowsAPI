@@ -10,10 +10,10 @@ protected:
 	Microsoft::WRL::ComPtr<ID2D1HwndRenderTarget> mspRenderTarget{};
 
 public:
-	virtual HRESULT Inint(HWND hwnd);
+	virtual HRESULT Init(HWND hwnd);
 	virtual void Release();
 	virtual void Render();
 
-
+	void ShowErrorMsg(LPCWSTR msg, HRESULT error = 0, LPCWSTR title = L"Error");
 };
 

@@ -5,6 +5,8 @@ const wchar_t gClassName[] = L"MyWindowClass";
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
+D2DFramework myFramework;
+
 int WINAPI WinMain(
 	_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
@@ -28,8 +30,8 @@ int WINAPI WinMain(
 		return 0;
 	}
 
-	RECT rct{ 0, 0, 1024, 768 };
-	AdjustWindowRect(&rct, WS_OVERLAPPEDWINDOW, FALSE);
+	RECT rc{ 0, 0, 1024, 768 };
+	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
 	hwnd = CreateWindowEx(
 		NULL,
 		gClassName,
@@ -37,8 +39,8 @@ int WINAPI WinMain(
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
-		rct.right - rct.left,
-		rct.bottom - rct.top,
+		rc.right - rc.left,
+		rc.bottom - rc.top,
 		NULL,
 		NULL,
 		hInstance,
@@ -49,37 +51,37 @@ int WINAPI WinMain(
 		return 0;
 	}
 
+	myFramework.Init(hwnd);
+
 	ShowWindow(hwnd, nShowCmd);
 	UpdateWindow(hwnd);
 
 	MSG msg;
-	while (GetMessage(&msg, nullptr, 0, 0))
+	while (true)
 	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+
+			if (msg.message == WM_QUIT)
+			{
+				break;
+			}
+		}
+		else
+		{
+			myFramework.Render();
+		}
 	}
-
+	myFramework.Release();
 	return static_cast<int>(msg.wParam);
-}
-
-void OnPaint(HWND hwnd)
-{
-	HDC hdc;
-	PAINTSTRUCT ps;
-
-	hdc  = BeginPaint(hwnd, &ps);
-
-	EndPaint(hwnd, &ps);
 }
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
-		case WM_PAINT:
-			OnPaint(hwnd);
-			break;
-
 		case WM_CLOSE:
 			DestroyWindow(hwnd);
 			break;
