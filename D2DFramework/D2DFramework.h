@@ -21,7 +21,6 @@ public:
 
 		return ss.str().c_str();
 	}
-
 };
 
 inline void ThrowIfFailed(HRESULT hr)
@@ -34,15 +33,29 @@ inline void ThrowIfFailed(HRESULT hr)
 
 class D2DFramework
 {
+private:
+	const LPCWSTR WINDOW_CLASSNAME{ L"D2DWindowClass" };
+
 protected:
-	Microsoft::WRL::ComPtr<ID2D1Factory> mspD2DFactory{};
-	Microsoft::WRL::ComPtr<ID2D1HwndRenderTarget> mspRenderTarget{};
+	HWND mHwnd{};
+	Microsoft::WRL::ComPtr<ID2D1Factory>			mspD2DFactory{};
+	Microsoft::WRL::ComPtr<ID2D1HwndRenderTarget>	mspRenderTarget{};
+
+protected:
+	HRESULT InitWindow(HINSTANCE hInstance, LPCWSTR title, UINT width, UINT height);
+	virtual HRESULT InitD2D();
+	virtual HRESULT CreateDevicResources();
 
 public:
-	virtual HRESULT Init(HWND hwnd);
+	virtual void Initialize(HINSTANCE hInstance, LPCWSTR title = L"D2DFramework", 
+		UINT width = 1024, UINT height = 768);
 	virtual void Release();
 	virtual void Render();
+	virtual int GameLoop();
 
 	void ShowErrorMsg(LPCWSTR msg, HRESULT error = 0, LPCWSTR title = L"Error");
+
+public:
+	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 };
 
