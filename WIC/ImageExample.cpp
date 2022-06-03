@@ -51,7 +51,13 @@ HRESULT ImageExample::LoadBMP(LPCWSTR filename, ID2D1Bitmap** ppBitmap)
 	std::vector<char> pPixels(bih.biSizeImage);
 	int pitch = bih.biWidth * (bih.biBitCount / 8);
 
-	file.read(&pPixels[0], bih.biSizeImage);
+	//file.read(&pPixels[0], bih.biSizeImage);
+
+	// pitch 단위로 뒤집어서 읽는다
+	for (int y = bih.biHeight - 1; y >= 0; --y)
+	{
+		file.read(&pPixels[y * pitch], pitch);
+	}
 
 	file.close();
 
@@ -59,7 +65,7 @@ HRESULT ImageExample::LoadBMP(LPCWSTR filename, ID2D1Bitmap** ppBitmap)
 	HRESULT hr = mspRenderTarget->CreateBitmap(
 		D2D1::SizeU(bih.biWidth, bih.biHeight),
 		D2D1::BitmapProperties(
-			D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE)
+			D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)
 		),
 		ppBitmap
 	);
