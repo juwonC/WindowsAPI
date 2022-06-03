@@ -2,12 +2,28 @@
 #include <vector>
 #include "ImageExample.h"
 
+#pragma comment (lib, "WindowsCodecs.lib")
+
 HRESULT ImageExample::Initialize(HINSTANCE hInstance, LPCWSTR title, UINT width, UINT height)
 {
+	HRESULT hr = CoInitialize(nullptr);
+	ThrowIfFailed(hr);
+
+	hr = CoCreateInstance(
+		CLSID_WICImagingFactory,
+		nullptr,
+		CLSCTX_INPROC_SERVER,
+		IID_PPV_ARGS(mspWICFactory.GetAddressOf())
+	);
+	ThrowIfFailed(hr);
+	
 	D2DFramework::Initialize(hInstance, title, width, height);
 
-	LoadBMP(L"Data/32.bmp", mspBitmap.GetAddressOf());
-	
+	//LoadBMP(L"Data/32.bmp", mspBitmap.GetAddressOf());
+	//LoadBMP(L"Data/32.bmp", mspBitmap.GetAddressOf());
+	//LoadWICImage(L"Data/32.bmp", mspBitmap.GetAddressOf());
+	LoadWICImage(L"Data/1.png", mspBitmap.GetAddressOf());
+
 	return S_OK;
 }
 
@@ -21,11 +37,21 @@ void ImageExample::Render()
 	mspRenderTarget->EndDraw();
 }
 
+void ImageExample::Release()
+{
+	D2DFramework::Release();
+
+	mspBitmap.Reset();
+	mspWICFactory.Reset();
+
+	CoUninitialize();
+}
+
 HRESULT ImageExample::LoadBMP(LPCWSTR filename, ID2D1Bitmap** ppBitmap)
 {
 	// 1. 파일 열기
 	std::ifstream file;
-	file.open("Data/32.bmp", std::ios::binary);
+	file.open(filename, std::ios::binary);
 
 	// 2. BITMAPFILEHEADER 읽기
 	BITMAPFILEHEADER bfh;
@@ -101,5 +127,49 @@ HRESULT ImageExample::LoadBMP(LPCWSTR filename, ID2D1Bitmap** ppBitmap)
 
 	(*ppBitmap)->CopyFromMemory(nullptr, &pPixels[0], pitch);
 	
+	return S_OK;
+}
+
+HRESULT ImageExample::LoadWICImage(LPCWSTR filename, ID2D1Bitmap** ppBitmap)
+{
+	// 1. Decoder 생성
+	Microsoft::WRL::ComPtr<IWICBitmapDecoder> bitmapDecoder;
+	HRESULT hr;
+	hr = mspWICFactory->CreateDecoderFromFilename(
+		filename,
+		nullptr,
+		GENERIC_READ,
+		WICDecodeMetadataCacheOnLoad,
+		bitmapDecoder.GetAddressOf()
+	);
+	ThrowIfFailed(hr);
+
+	// 2. Decoder에서 Frame 획득
+	Microsoft::WRL::ComPtr<IWICBitmapFrameDecode> frame;
+	hr = bitmapDecoder->GetFrame(0, frame.GetAddressOf());
+	ThrowIfFailed(hr);
+
+	// 3. Converter를 사용해서 원하는 포멧으로 변환
+	Microsoft::WRL::ComPtr<IWICFormatConverter> converter;
+	hr = mspWICFactory->CreateFormatConverter(converter.GetAddressOf());
+	ThrowIfFailed(hr);
+
+	hr = converter->Initialize(
+		frame.Get(),
+		GUID_WICPixelFormat32bppPBGRA,
+		WICBitmapDitherTypeNone,
+		nullptr,
+		0,
+		WICBitmapPaletteTypeCustom
+	);
+	ThrowIfFailed(hr);
+	
+	// 4. 변환된 데이터에서 비트맵 생성
+	hr = mspRenderTarget->CreateBitmapFromWicBitmap(
+		converter.Get(),
+		mspBitmap.ReleaseAndGetAddressOf()
+	);
+	ThrowIfFailed(hr);
+
 	return S_OK;
 }
