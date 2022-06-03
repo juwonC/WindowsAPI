@@ -54,9 +54,36 @@ HRESULT ImageExample::LoadBMP(LPCWSTR filename, ID2D1Bitmap** ppBitmap)
 	//file.read(&pPixels[0], bih.biSizeImage);
 
 	// pitch 단위로 뒤집어서 읽는다
+	//for (int y = bih.biHeight - 1; y >= 0; --y)
+	//{
+	//	file.read(&pPixels[y * pitch], pitch);
+	//}
+
+	// 비트맵 이미지 배경 제거
+	int index{};
+
 	for (int y = bih.biHeight - 1; y >= 0; --y)
 	{
-		file.read(&pPixels[y * pitch], pitch);
+		index = y * pitch;
+		for (int x = 0; x < bih.biWidth; ++x)
+		{
+			char r{}, g{}, b{}, a{};
+
+			file.read(&b, 1);
+			file.read(&g, 1);
+			file.read(&r, 1);
+			file.read(&a, 1);
+
+			if (r == 30 || g == 199 || r == 250)
+			{
+				r = g = b = a = 0;
+			}
+
+			pPixels[index++] = b;
+			pPixels[index++] = g;
+			pPixels[index++] = r;
+			pPixels[index++] = a;
+		}
 	}
 
 	file.close();
