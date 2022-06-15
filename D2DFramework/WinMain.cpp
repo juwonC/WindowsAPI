@@ -14,9 +14,10 @@ int WINAPI WinMain(
 		D2DFramework myFramework;
 
 
-		myFramework.Initialize(hInstance);
-		
-		result = myFramework.GameLoop();
+		if (SUCCEEDED(myFramework.Initialize(hInstance)))
+		{
+			result = myFramework.GameLoop();
+		}
 	}
 	catch (com_exception& e)
 	{

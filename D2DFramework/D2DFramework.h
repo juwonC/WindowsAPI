@@ -47,7 +47,7 @@ protected:
 	virtual HRESULT CreateDevicResources();
 
 public:
-	virtual void Initialize(HINSTANCE hInstance, LPCWSTR title = L"D2DFramework", 
+	virtual HRESULT Initialize(HINSTANCE hInstance, LPCWSTR title = L"D2DFramework", 
 		UINT width = 1024, UINT height = 768);
 	virtual void Release();
 	virtual void Render();

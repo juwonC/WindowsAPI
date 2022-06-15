@@ -85,7 +85,7 @@ HRESULT D2DFramework::CreateDevicResources()
 	return hr;
 }
 
-void D2DFramework::Initialize(HINSTANCE hInstance, LPCWSTR title, UINT width, UINT height)
+HRESULT D2DFramework::Initialize(HINSTANCE hInstance, LPCWSTR title, UINT width, UINT height)
 {
 	HRESULT hr;
 	
@@ -97,6 +97,8 @@ void D2DFramework::Initialize(HINSTANCE hInstance, LPCWSTR title, UINT width, UI
 
 	ShowWindow(mHwnd, SW_SHOW);
 	UpdateWindow(mHwnd);
+
+	return hr;
 }
 
 void D2DFramework::Release()
